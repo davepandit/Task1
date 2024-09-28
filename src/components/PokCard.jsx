@@ -6,10 +6,18 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Modal from "react-modal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { context } from "../context/context";
+import { useContext } from "react";
 
 export default function PokCard({ image, name, pokemon }) {
+  //set the context
+  const pokemons = useContext(context);
+  //this pokemon can be used to access the state
   const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  //state to check whether the pokemon has been selected or not
+  const [pokemonChosen, setPokemonChosen] = useState(false);
 
   // Play the cry sound
   const playSound = () => {
@@ -25,9 +33,24 @@ export default function PokCard({ image, name, pokemon }) {
     setModalIsOpen(false);
   };
 
+  const insertPokemonsIntoArray = (name) => {
+    //first change the background color
+    setPokemonChosen((prev) => !prev);
+    pokemons.setSelectedPokemons((prev) => [...prev, name]);
+  };
+
+  useEffect(() => {
+    console.log(`Selected Pokemons:${pokemons.selectedPokemons}`);
+  }, [pokemons]);
+
   return (
     <>
-      <Card sx={{ width: 345 }}>
+      <Card
+        sx={{
+          width: 345,
+          backgroundColor: pokemonChosen ? "#f2f5b5" : "white",
+        }}
+      >
         <CardMedia component="img" alt={name} height="120" image={image} />
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
@@ -40,6 +63,9 @@ export default function PokCard({ image, name, pokemon }) {
           </Button>
           <Button size="small" onClick={openModal}>
             See More
+          </Button>
+          <Button size="small" onClick={() => insertPokemonsIntoArray(name)}>
+            Select
           </Button>
         </CardActions>
       </Card>
