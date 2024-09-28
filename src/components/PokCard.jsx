@@ -15,6 +15,8 @@ export default function PokCard({ image, name, pokemon }) {
   const pokemons = useContext(context);
   //this pokemon can be used to access the state
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  //battle modal
+  const [battleModal, setBattleModal] = useState(false);
 
   //state to check whether the pokemon has been selected or not
   const [pokemonChosen, setPokemonChosen] = useState(false);
@@ -33,15 +35,47 @@ export default function PokCard({ image, name, pokemon }) {
     setModalIsOpen(false);
   };
 
-  const insertPokemonsIntoArray = (name) => {
+  const insertPokemonsIntoArray = (pokemon) => {
     //first change the background color
     setPokemonChosen((prev) => !prev);
-    pokemons.setSelectedPokemons((prev) => [...prev, name]);
+    //here need to keep some check if the user selects the same pokemon again then remove from the list
+
+    const exists = pokemons.selectedPokemons.some(
+      (existingPokemon) => existingPokemon.name === pokemon.name
+    );
+    if (!exists) {
+      pokemons.setSelectedPokemons((prev) => [...prev, pokemon]);
+      pokemons.setCount((prev) => prev + 1);
+    } else {
+      const updatedPokemons = pokemons.setSelectedPokemons.filter(
+        (pokemon) => existingPokemon.name !== pokemon.name
+      );
+      pokemons.setCount((prev) => prev - 1);
+    }
   };
 
   useEffect(() => {
     console.log(`Selected Pokemons:${pokemons.selectedPokemons}`);
   }, [pokemons]);
+
+  useEffect(() => {
+    if (pokemons.count == 2) {
+      //set the state of the modal to open
+      setBattleModal(true);
+    }
+  }, [pokemons]);
+
+  const closeBattleModal = () => {
+    setBattleModal(false); // This will close the modal first
+  };
+
+  // Clear selectedPokemons when the modal closes
+  useEffect(() => {
+    if (!battleModal) {
+      pokemons.setSelectedPokemons([]);
+      console.log("Selected Pokémon cleared");
+    }
+  }, [battleModal]);
 
   return (
     <>
@@ -64,7 +98,7 @@ export default function PokCard({ image, name, pokemon }) {
           <Button size="small" onClick={openModal}>
             See More
           </Button>
-          <Button size="small" onClick={() => insertPokemonsIntoArray(name)}>
+          <Button size="small" onClick={() => insertPokemonsIntoArray(pokemon)}>
             Select
           </Button>
         </CardActions>
@@ -132,6 +166,34 @@ export default function PokCard({ image, name, pokemon }) {
           Close
         </button>
       </Modal>
+
+      {/* battle modal  */}
+      {pokemons.selectedPokemons.length == 2 ? (
+        <Modal isOpen={battleModal} onRequestClose={closeBattleModal}>
+          <h2 className="text-center text-2xl font-bold">Battle Time!</h2>
+          <div className="flex justify-between">
+            {pokemons?.selectedPokemons?.map((selectedPok, index) => (
+              <div key={index} className="flex flex-col items-center">
+                <Typography variant="h6">{selectedPok.name}</Typography>
+                <Typography variant="h6">{selectedPok.eggGroups}</Typography>
+                <CardMedia
+                  component="img"
+                  alt={selectedPok}
+                  height="120"
+                  image={selectedPok.sprites.front_default} // Adjust the image source as necessary
+                />
+              </div>
+            ))}
+            {/* damage calculation aomponent can come here  */}
+          </div>
+          <button
+            onClick={closeBattleModal}
+            className="bg-blue-200 rounded-2xl px-4 py-1 hover:opacity-55 duration-300 ease-in-out"
+          >
+            Close
+          </button>
+        </Modal>
+      ) : null}
     </>
   );
 }
