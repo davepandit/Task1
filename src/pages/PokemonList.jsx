@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useEffect } from "react";
 import PokCard from "../components/PokCard";
 
 const PokemonList = () => {
-  //make request using axios
   const [pokemons, setPokemons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -17,15 +15,24 @@ const PokemonList = () => {
         );
         const pokemons = response.data.results;
 
-        // Fetch details for each Pokémon
-        const pokemonDetailsPromises = pokemons.map((pokemon) =>
-          axios.get(pokemon.url)
-        );
-        const pokemonDetailsResponses = await Promise.all(
-          pokemonDetailsPromises
-        );
-        const detailedPokemons = pokemonDetailsResponses.map((res) => res.data);
+        // Fetch details for each Pokémon including species for additional details
+        const pokemonDetailsPromises = pokemons.map(async (pokemon) => {
+          const pokemonResponse = await axios.get(pokemon.url);
+          const speciesResponse = await axios.get(
+            pokemonResponse.data.species.url
+          );
+          return {
+            ...pokemonResponse.data,
+            color: speciesResponse.data.color.name,
+            shape: speciesResponse.data.shape.name,
+            eggGroups: speciesResponse.data.egg_groups
+              .map((group) => group.name)
+              .join(", "), // Joining egg groups into a string
+            location_area: speciesResponse.data.habitat?.name || "N/A", // Assuming you want the habitat
+          };
+        });
 
+        const detailedPokemons = await Promise.all(pokemonDetailsPromises);
         setPokemons(detailedPokemons);
         setLoading(false);
       } catch (err) {
@@ -37,16 +44,13 @@ const PokemonList = () => {
     fetchPokemons();
   }, []);
 
-  if (loading) {
-    <div>Loading......</div>;
-  }
-  if (error) {
-    <div>{error}</div>;
-  }
+  if (loading) return <div>Loading......</div>;
+  if (error) return <div>{error}</div>;
+
   return (
     <>
       <div className="flex justify-center mt-3">
-        <span className=" font-bold text-xl bg-yellow-200 p-1">
+        <span className="font-bold text-xl bg-yellow-200 p-1">
           Pokemon List
         </span>
       </div>

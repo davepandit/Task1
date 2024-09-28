@@ -9,15 +9,14 @@ import Modal from "react-modal";
 import { useState } from "react";
 
 export default function PokCard({ image, name, pokemon }) {
-  console.log(pokemon);
-  //play the cry sound
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  // Play the cry sound
   const playSound = () => {
     const audio = new Audio(`https://pokemoncries.com/cries/${pokemon.id}.mp3`);
     audio.play();
   };
 
-  //modal state and all
-  const [modalIsOpen, setModalIsOpen] = useState(false);
   const openModal = () => {
     setModalIsOpen(true);
   };
@@ -25,15 +24,11 @@ export default function PokCard({ image, name, pokemon }) {
   const closeModal = () => {
     setModalIsOpen(false);
   };
+
   return (
     <>
       <Card sx={{ width: 345 }}>
-        <CardMedia
-          component="img"
-          alt="green iguana"
-          height="120"
-          image={image}
-        />
+        <CardMedia component="img" alt={name} height="120" image={image} />
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
             {name}
@@ -48,18 +43,21 @@ export default function PokCard({ image, name, pokemon }) {
           </Button>
         </CardActions>
       </Card>
+
       <Modal isOpen={modalIsOpen} onRequestClose={closeModal}>
         <h2 className="text-center text-2xl font-bold">{pokemon.name}</h2>
-
         <p className="font-semibold text-lg">
           Height: {pokemon.height} decimeters
         </p>
         <p className="font-semibold text-lg">
           Weight: {pokemon.weight} hectograms
         </p>
-
         <p className="font-semibold text-lg">Color: {pokemon.color}</p>
         <p className="font-semibold text-lg">Shape: {pokemon.shape}</p>
+        <p className="font-semibold text-lg">
+          Location: {pokemon.location_area}
+        </p>
+        <p className="font-semibold text-lg">Egg Groups: {pokemon.eggGroups}</p>
 
         <p className="font-semibold text-lg">Base Stats:</p>
         <ul className="list-disc ml-5">
@@ -96,21 +94,10 @@ export default function PokCard({ image, name, pokemon }) {
 
         <p className="font-semibold text-lg">Moves:</p>
         <ul className="list-disc ml-5">
-          {pokemon.moves.slice(0, 5).map(
-            (
-              move // Displaying only the first 5 moves
-            ) => (
-              <li key={move.move.name}>{move.move.name}</li>
-            )
-          )}
+          {pokemon.moves.slice(0, 5).map((move) => (
+            <li key={move.move.name}>{move.move.name}</li>
+          ))}
         </ul>
-
-        <p className="font-semibold text-lg">
-          Location: {pokemon.location_area ? pokemon.location_area.name : "N/A"}
-        </p>
-        {/* <p className="font-semibold text-lg">
-          Egg Groups: {pokemon.egg_groups.map((group) => group.name).join(", ")}
-        </p> */}
 
         <button
           onClick={closeModal}
