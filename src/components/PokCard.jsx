@@ -9,6 +9,7 @@ import Modal from "react-modal";
 import { useState, useEffect } from "react";
 import { context } from "../context/context";
 import { useContext } from "react";
+import Battle from "./Battle";
 
 export default function PokCard({ image, name, pokemon }) {
   //set the context
@@ -171,24 +172,30 @@ export default function PokCard({ image, name, pokemon }) {
       {pokemons.selectedPokemons.length == 2 ? (
         <Modal isOpen={battleModal} onRequestClose={closeBattleModal}>
           <h2 className="text-center text-2xl font-bold">Battle Time!</h2>
-          <div className="flex justify-between">
-            {pokemons?.selectedPokemons?.map((selectedPok, index) => (
-              <div key={index} className="flex flex-col items-center">
-                <Typography variant="h6">{selectedPok.name}</Typography>
-                <Typography variant="h6">{selectedPok.eggGroups}</Typography>
-                <CardMedia
-                  component="img"
-                  alt={selectedPok}
-                  height="120"
-                  image={selectedPok.sprites.front_default} // Adjust the image source as necessary
-                />
-              </div>
-            ))}
+          <div className="flex flex-col justify-between">
+            <div className="flex justify-between">
+              {pokemons?.selectedPokemons?.map((selectedPok, index) => (
+                <div key={index} className="flex flex-col items-center">
+                  <Typography variant="h6">{selectedPok.name}</Typography>
+                  <Typography variant="h6">{selectedPok.eggGroups}</Typography>
+                  <CardMedia
+                    component="img"
+                    alt={selectedPok}
+                    height="120"
+                    image={selectedPok.sprites.front_default} // Adjust the image source as necessary
+                  />
+                </div>
+              ))}
+            </div>
             {/* damage calculation aomponent can come here  */}
+            <Battle
+              pokemon1Data={pokemons.selectedPokemons[0]}
+              pokemon2Data={pokemons.selectedPokemons[1]}
+            />
           </div>
           <button
             onClick={closeBattleModal}
-            className="bg-blue-200 rounded-2xl px-4 py-1 hover:opacity-55 duration-300 ease-in-out"
+            className="bg-blue-200 rounded-2xl px-4 py-1 hover:opacity-55 duration-300 ease-in-out mt-9"
           >
             Close
           </button>
