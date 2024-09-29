@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const Battle = ({ pokemon1Data, pokemon2Data }) => {
   const [pokemon1Move, setPokemon1Move] = useState(null);
@@ -10,6 +10,8 @@ const Battle = ({ pokemon1Data, pokemon2Data }) => {
     damage1: null,
     damage2: null,
   });
+  const [winner, setWinner] = useState(null);
+  const [showSummary, setShowSummary] = useState(false);
 
   const fetchMoveDetails = async (moveUrl, setMoveData) => {
     try {
@@ -81,14 +83,22 @@ const Battle = ({ pokemon1Data, pokemon2Data }) => {
 
       setDamageResults({ damage1, damage2 });
 
+      // Determine the winner
+      const winnerName =
+        damage1 > damage2 ? pokemon1Data.name : pokemon2Data.name;
+      setWinner(winnerName);
+
       setBattleResult(
         `${pokemon1Data.name} dealt ${damage1} damage to ${pokemon2Data.name}, and ${pokemon2Data.name} dealt ${damage2} damage to ${pokemon1Data.name}.`
       );
+
+      // Show summary after a brief delay
+      setShowSummary(true);
     }
   };
 
   // Automatically evaluate the battle when both moves are selected
-  React.useEffect(() => {
+  useEffect(() => {
     if (pokemon1Move && pokemon2Move) {
       evaluateBattle();
     }
@@ -100,7 +110,7 @@ const Battle = ({ pokemon1Data, pokemon2Data }) => {
 
   return (
     <div>
-      <div className="flex justify-between">
+      <div className="flex justify-between mb-4">
         <button
           onClick={handleAttack1}
           className="bg-blue-200 rounded-2xl px-4 py-1 hover:opacity-55 duration-300 ease-in-out"
@@ -124,10 +134,25 @@ const Battle = ({ pokemon1Data, pokemon2Data }) => {
         )}
       </div>
 
-      {battleResult && (
-        <div className="mt-4 p-4 bg-green-100 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold">Battle Result</h2>
-          <p>{battleResult}</p>
+      {showSummary && (
+        <div className="mt-4 p-4 bg-green-100 rounded-lg shadow-md transition-opacity duration-500 ease-in-out opacity-100">
+          <h2 className="text-xl font-bold">Battle Summary</h2>
+          <p className="mt-2">{battleResult}</p>
+          <h3 className="mt-4 font-bold text-lg">Winner: {winner}</h3>
+          <h4 className="mt-2 text-sm">
+            Moves Used:
+            <br />
+            {pokemon1Data.name}: {pokemon1Move.name}
+            <br />
+            {pokemon2Data.name}: {pokemon2Move.name}
+          </h4>
+          <h4 className="mt-2 text-sm">
+            Damage Caused:
+            <br />
+            {pokemon1Data.name}: {damageResults.damage1}
+            <br />
+            {pokemon2Data.name}: {damageResults.damage2}
+          </h4>
         </div>
       )}
     </div>
